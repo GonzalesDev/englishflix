@@ -17,7 +17,7 @@ export function episodiosDia() {
       img: c.img,
       contexto: c.contexto,
       missao: "Converse com naturalidade até a situação terminar.",
-      prompt: c.prompt + ` Reply ONLY with a JSON object with keys "fala" (your in-character English line), "dica" (short tip in PORTUGUESE or ""), "opcoes" (2 example replies in English). Keep the scene realistic.`,
+      prompt: c.prompt + ` Reply ONLY with a JSON object with keys "fala" (your in-character English line), "dica" (short tip in PORTUGUESE or ""), "opcoes" (2 example replies in English). Keep the scene realistic. Messages in parentheses are stage directions from the app: never comment on them, just play the scene.`,
     };
   });
 }

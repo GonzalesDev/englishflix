@@ -76,7 +76,7 @@ export default function EpisodeChat({ episodio, progresso, onAtualizar, onVoltar
   function comecarEpisodio() {
     setIniciado(true);
     setMensagens([]);
-    responder([{ role: "user", content: "Hello! Let's start the scene." }], 0, 0);
+    responder([{ role: "user", content: "(Start the scene now. Speak first, in character.)" }], 0, 0);
   }
 
   function enviarTexto(texto) {
