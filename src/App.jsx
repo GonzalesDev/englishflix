@@ -7,7 +7,8 @@ import { carregarProgresso, salvarProgresso, registrarAtividade } from "./lib/st
 
 export default function App() {
   const [aba, setAba] = useState("series");
-  const [episodio, setEpisodio] = useState(null); // chave do cenário aberto, ou null (lista)
+  const [modo, setModo] = useState("dia"); // "dia" | "universos"
+  const [episodio, setEpisodio] = useState(null); // objeto do episódio aberto, ou null (lista)
   const [progresso, setProgresso] = useState(carregarProgresso);
 
   // Salva a cada mudança de progresso
@@ -15,14 +16,15 @@ export default function App() {
     salvarProgresso(progresso);
   }, [progresso]);
 
-  // Atualiza XP e o progresso de um episódio; também conta a sequência de dias
+  // Atualiza XP e o progresso do episódio atual; também conta a sequência de dias
   function atualizarEpisodio(xpGanho, serieNova) {
+    if (!episodio) return;
     setProgresso((atual) => {
       const comAtividade = registrarAtividade(atual);
       return {
         ...comAtividade,
         xp: comAtividade.xp + xpGanho,
-        series: { ...comAtividade.series, [episodio]: serieNova },
+        series: { ...comAtividade.series, [episodio.id]: serieNova },
       };
     });
   }
@@ -38,13 +40,13 @@ export default function App() {
 
       <main className="conteudo">
         {aba === "series" && episodio === null && (
-          <SeriesGrid progresso={progresso} onAbrir={setEpisodio} />
+          <SeriesGrid modo={modo} onModo={setModo} progresso={progresso} onAbrir={setEpisodio} />
         )}
 
         {aba === "series" && episodio !== null && (
           <EpisodeChat
-            key={episodio}
-            cenarioKey={episodio}
+            key={episodio.id}
+            episodio={episodio}
             progresso={progresso}
             onAtualizar={atualizarEpisodio}
             onVoltar={() => setEpisodio(null)}

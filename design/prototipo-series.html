@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protótipo — Séries</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fundo: #0b0b0f; --superficie: #17171e; --superficie-2: #22222c; --borda: #2e2e3a;
+    --texto: #f5f5f7; --texto-suave: #9a9aab; --destaque: #e50914; --destaque-2: #ff6b3d;
+    --sucesso: #22c55e; --aviso: #eab308; --azul: #38bdf8; --raio: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Inter", system-ui, sans-serif; background: var(--fundo); color: var(--texto); min-height: 100vh; }
+  button, input { font: inherit; color: inherit; }
+
+  /* Layout */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .menu { width: 220px; flex-shrink: 0; background: #000; border-right: 1px solid var(--borda); padding: 26px 16px; display: flex; flex-direction: column; gap: 26px; }
+  .marca { font-size: 22px; font-weight: 800; padding-left: 10px; }
+  .marca span { color: var(--destaque); }
+  .menu-itens { display: flex; flex-direction: column; gap: 6px; }
+  .menu-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: none; border-radius: 10px; background: transparent; color: var(--texto-suave); font-weight: 600; cursor: pointer; text-align: left; }
+  .menu-item.ativo { background: rgba(229,9,20,.15); color: var(--texto); box-shadow: inset 3px 0 0 var(--destaque); }
+  .resumo { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+  .chip { background: var(--superficie); border: 1px solid var(--borda); border-radius: 999px; padding: 7px 13px; font-size: 13px; font-weight: 600; }
+  .conteudo { flex: 1; overflow-y: auto; padding: 34px 44px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+  /* Seletor de modo */
+  .modos { display: inline-flex; background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px; padding: 4px; align-self: flex-start; }
+  .modo { border: none; background: transparent; padding: 10px 18px; border-radius: 9px; font-weight: 700; color: var(--texto-suave); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+  .modo.ativo { background: var(--superficie-2); color: var(--texto); box-shadow: 0 0 0 1px var(--borda); }
+  .modo.ativo.universos { box-shadow: 0 0 0 1px var(--azul); color: var(--azul); }
+  .modo small { font-weight: 500; color: var(--texto-suave); font-size: 12px; }
+
+  h1 { font-size: 30px; font-weight: 800; letter-spacing: -.4px; }
+  .subtitulo { color: var(--texto-suave); margin-top: 6px; line-height: 1.5; }
+
+  /* Grades */
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+  .card { border-radius: var(--raio); background: var(--superficie); border: 1px solid var(--borda); padding: 18px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: transform .2s, border-color .2s; min-height: 170px; }
+  .card:hover { transform: translateY(-3px); border-color: var(--texto-suave); }
+  .card .emoji { font-size: 30px; }
+  .card h3 { font-size: 17px; font-weight: 700; }
+  .card p { color: var(--texto-suave); font-size: 13px; line-height: 1.5; }
+  .card .rodape { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--texto-suave); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.06); color: var(--texto-suave); align-self: flex-start; }
+  .tag.azul { background: rgba(56,189,248,.12); color: var(--azul); }
+  .tag.laranja { background: rgba(255,107,61,.14); color: var(--destaque-2); }
+  .estrelas { color: var(--aviso); letter-spacing: 2px; }
+  .barra { height: 5px; background: var(--borda); border-radius: 999px; overflow: hidden; }
+  .barra > div { height: 100%; background: linear-gradient(90deg, var(--destaque), var(--destaque-2)); }
+  .card.universos .barra > div { background: linear-gradient(90deg, var(--azul), #818cf8); }
+
+  /* Episódio */
+  .topo-episodio { display: flex; align-items: center; gap: 16px; }
+  .voltar { background: transparent; border: 1px solid var(--borda); color: var(--texto-suave); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+  .missao { flex: 1; background: var(--superficie); border: 1px solid var(--borda); border-left: 4px solid var(--destaque); border-radius: 12px; padding: 12px 16px; }
+  .missao.universos { border-left-color: var(--azul); }
+  .missao small { color: var(--texto-suave); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; }
+  .missao p { font-weight: 600; margin-top: 4px; }
+  .missao .barra { margin-top: 8px; }
+
+  .corpo { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 16px; flex: 1; min-height: 0; }
+  .conversa { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding: 4px; }
+  .bolha { max-width: 76%; padding: 12px 16px; border-radius: 16px; line-height: 1.55; }
+  .ai { align-self: flex-start; background: var(--superficie-2); border: 1px solid var(--borda); border-bottom-left-radius: 4px; }
+  .ai .nome { display: block; font-size: 11px; font-weight: 700; color: var(--texto-suave); margin-bottom: 4px; }
+  .user { align-self: flex-end; background: var(--destaque); color: #fff; border-bottom-right-radius: 4px; }
+  .sistema { align-self: center; background: rgba(255,255,255,.06); color: var(--texto-suave); font-size: 12px; padding: 6px 14px; border-radius: 999px; }
+
+  .opcoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .opcao { background: transparent; border: 1px solid var(--azul); color: var(--azul); padding: 9px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; }
+  .opcao:hover { background: rgba(56,189,248,.1); }
+
+  .lateral { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+  .lateral h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--texto-suave); }
+  .dica { background: rgba(234,179,8,.1); border-left: 3px solid var(--aviso); border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.5; }
+  .dica strong { display: block; color: var(--aviso); font-size: 11px; margin-bottom: 3px; }
+  .vocab { display: flex; flex-wrap: wrap; gap: 6px; }
+  .vocab span { background: var(--superficie-2); border: 1px solid var(--borda); border-radius: 8px; padding: 5px 9px; font-size: 13px; }
+  .vocab span small { color: var(--texto-suave); }
+
+  .entrada { display: flex; gap: 10px; }
+  .entrada input { flex: 1; background: var(--superficie); border: 1px solid var(--borda); border-radius: 10px; padding: 13px 16px; outline: none; }
+  .entrada button { background: var(--destaque); color: #fff; border: none; border-radius: 10px; padding: 0 22px; font-weight: 700; cursor: pointer; }
+  .universos-entrada .entrada button { background: var(--azul); color: #0b0b0f; }
+
+  .nota { font-size: 12px; color: var(--texto-suave); border: 1px dashed var(--borda); padding: 10px 12px; border-radius: 10px; line-height: 1.5; }
+
+  @media (max-width: 768px) {
+    .app { flex-direction: column-reverse; }
+    .menu { width: 100%; flex-direction: row; padding: 6px; gap: 4px; border-right: none; border-top: 1px solid var(--borda); align-items: center; }
+    .marca, .resumo { display: none; }
+    .menu-itens { flex-direction: row; width: 100%; }
+    .menu-item { flex: 1; flex-direction: column; font-size: 11px; justify-content: center; padding: 8px 4px; gap: 2px; }
+    .conteudo { padding: 18px 16px; }
+    h1 { font-size: 24px; }
+    .corpo { grid-template-columns: 1fr; grid-template-rows: 1fr 170px; }
+    .bolha { max-width: 90%; }
+    .modos { width: 100%; }
+    .modo { flex: 1; justify-content: center; padding: 10px 6px; font-size: 13px; }
+    .modo small { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="menu">
+    <div class="marca"><span>English</span>Flix</div>
+    <nav class="menu-itens">
+      <button class="menu-item ativo">🎬 Séries</button>
+      <button class="menu-item">🃏 Cartas</button>
+      <button class="menu-item">🎵 Música</button>
+      <button class="menu-item">🚀 Arcade</button>
+    </nav>
+    <div class="resumo">
+      <div class="chip">🔥 3 dias</div>
+      <div class="chip">⭐ 340 XP</div>
+    </div>
+  </aside>
+
+  <main class="conteudo" id="tela"></main>
+</div>
+
+<script>
+// ===== Dados do protótipo (personagens e cenas originais) =====
+const MODO_DIA = {
+  cenarios: [
+    { id: "d1", emoji: "🍽️", titulo: "Jantar em Nova York", desc: "Peça o jantar e converse com o garçom.", nivel: "A2", estrelas: 2, progresso: 66 },
+    { id: "d2", emoji: "✈️", titulo: "Imigração em Londres", desc: "Responda às perguntas do oficial na chegada.", nivel: "B1", estrelas: 3, progresso: 100, concluido: true },
+    { id: "d3", emoji: "🗺️", titulo: "Perdido no Centro", desc: "Peça informações a um morador local.", nivel: "A2", estrelas: 0, progresso: 0 },
+    { id: "d4", emoji: "🩺", titulo: "Consulta em Toronto", desc: "Explique seus sintomas ao médico.", nivel: "B1", estrelas: 0, progresso: 0 },
+    { id: "d5", emoji: "💼", titulo: "Entrevista em São Francisco", desc: "Fale sobre sua experiência profissional.", nivel: "B2", estrelas: 0, progresso: 0 },
+    { id: "d6", emoji: "🛒", titulo: "Caixa do Supermercado", desc: "Passe as compras e responda as perguntas de praxe.", nivel: "A2", estrelas: 0, progresso: 0 }
+  ]
+};
+
+const MODO_UNIVERSOS = {
+  universos: [
+    { id: "u1", emoji: "🛰️", titulo: "Cargueiro Nimbus", genero: "Ficção científica", desc: "Sua nave perdeu energia no cinturão de asteroides. Convença a capitã a seguir o seu plano.", temporada: "Temporada 1 · 2/3 episódios", progresso: 66 },
+    { id: "u2", emoji: "🚂", titulo: "O Último Trem de Veridia", genero: "Mistério noir", desc: "Uma passageira sumiu no trem noturno. Você é o novo fiscal de bordo.", temporada: "Temporada 1 · 0/3 episódios", progresso: 0 },
+    { id: "u3", emoji: "🔐", titulo: "Operação Gelo Azul", genero: "Assalto", desc: "Uma equipe vai abrir um cofre num porto congelado. Você cuida dos alarmes.", temporada: "Em breve", progresso: 0, bloqueado: true },
+    { id: "u4", emoji: "🏰", titulo: "Reino das Cinzas", genero: "Fantasia", desc: "Negocie um tratado com o conselho de magos de uma cidade flutuante.", temporada: "Em breve", progresso: 0, bloqueado: true }
+  ]
+};
+
+const EPISODIO_EXEMPLO = {
+  modo: "universos",
+  titulo: "Cargueiro Nimbus · Episódio 2",
+  missao: "Convença a capitã a deixar você verificar o reator.",
+  progresso: 1, // de 3
+  mensagens: [
+    { papel: "sistema", texto: "Episódio 2 · Sala de máquinas" },
+    { papel: "ai", nome: "Capitã Ilse Varo", texto: "Reactor's offline. Nobody goes near it until I know who you are." },
+    { papel: "user", texto: "I'm the new engineer. I can fix the reactor in one hour." },
+    { papel: "ai", nome: "Capitã Ilse Varo", texto: "One hour? Show me. Why should I trust you with it?" }
+  ],
+  dica: "Para pedir permissão, use “Can I…?” ou “Would it be possible to…?”. “I can fix” soa direto demais numa situação tensa.",
+  vocab: [
+    ["reactor", "reator"], ["offline", "desligado"], ["to trust", "confiar"], ["engineer", "engenheiro(a)"]
+  ],
+  opcoes: ["I have experience with this model.", "Let me show you my plan.", "Can I check the reactor, please?"]
+};
+
+// ===== Renderização =====
+let modo = "dia";
+let tela = "lista"; // lista | episodio
+
+function render() {
+  const el = document.getElementById("tela");
+  el.innerHTML = tela === "lista" ? htmlLista() : htmlEpisodio();
+  el.querySelectorAll("[data-modo]").forEach(b => b.onclick = () => { modo = b.dataset.modo; tela = "lista"; render(); });
+  el.querySelectorAll("[data-abrir]").forEach(c => c.onclick = () => { tela = "episodio"; render(); });
+  const voltar = el.querySelector("[data-voltar]");
+  if (voltar) voltar.onclick = () => { tela = "lista"; render(); };
+  el.querySelectorAll("[data-opcao]").forEach(b => b.onclick = () => alert("Protótipo: aqui a resposta seria enviada à IA."));
+}
+
+function htmlModos() {
+  return `
+  <div class="modos">
+    <button class="modo ${modo === "dia" ? "ativo" : ""}" data-modo="dia">🏙️ Dia a Dia <small>realista</small></button>
+    <button class="modo universos ${modo === "universos" ? "ativo universos" : ""}" data-modo="universos">🌌 Universos <small>fictício</small></button>
+  </div>`;
+}
+
+function htmlLista() {
+  if (modo === "dia") {
+    return `
+    <div>
+      <h1>Séries · Dia a Dia</h1>
+      <p class="subtitulo">Situações do cotidiano em países de língua inglesa. Ideal para o inglês que aparece na vida real.</p>
+    </div>
+    ${htmlModos()}
+    <div class="grade">
+      ${MODO_DIA.cenarios.map(c => `
+        <div class="card" data-abrir="${c.id}">
+          <div class="emoji">${c.emoji}</div>
+          <span class="tag">Nível ${c.nivel}</span>
+          <h3>${c.titulo}</h3>
+          <p>${c.desc}</p>
+          <div class="barra"><div style="width:${c.progresso}%"></div></div>
+          <div class="rodape"><span class="estrelas">${"★".repeat(c.estrelas)}${"☆".repeat(3 - c.estrelas)}</span>${c.concluido ? '<span class="tag" style="color:var(--sucesso)">Concluído</span>' : ""}</div>
+        </div>`).join("")}
+    </div>`;
+  }
+  return `
+    <div>
+      <h1>Séries · Universos</h1>
+      <p class="subtitulo">Histórias fora do comum. Você entra na cena como personagem e resolve a missão falando inglês.</p>
+    </div>
+    ${htmlModos()}
+    <div class="grade">
+      ${MODO_UNIVERSOS.universos.map(u => `
+        <div class="card universos" ${u.bloqueado ? "" : `data-abrir="${u.id}"`} style="${u.bloqueado ? "opacity:.5;cursor:default" : ""}">
+          <div class="emoji">${u.emoji}</div>
+          <span class="tag azul">${u.genero}</span>
+          <h3>${u.titulo}</h3>
+          <p>${u.desc}</p>
+          <div class="barra"><div style="width:${u.progresso}%"></div></div>
+          <div class="rodape"><span>${u.temporada}</span>${u.bloqueado ? "🔒" : ""}</div>
+        </div>`).join("")}
+    </div>`;
+}
+
+function htmlEpisodio() {
+  const ep = EPISODIO_EXEMPLO;
+  const uni = ep.modo === "universos";
+  return `
+  <div class="topo-episodio">
+    <button class="voltar" data-voltar>← Séries</button>
+    <div class="missao ${uni ? "universos" : ""}" style="flex:1">
+      <small>Missão · ${ep.titulo}</small>
+      <p>${ep.missao}</p>
+      <div class="barra"><div style="width:${(ep.progresso / 3) * 100}%"></div></div>
+    </div>
+  </div>
+
+  <div class="corpo">
+    <div style="display:flex;flex-direction:column;gap:12px;min-height:0">
+      <div class="conversa" style="flex:1">
+        ${ep.mensagens.map(m => {
+          if (m.papel === "sistema") return `<div class="sistema" style="align-self:center">${m.texto}</div>`;
+          if (m.papel === "user") return `<div class="bolha user">${m.texto}</div>`;
+          return `<div class="bolha ai"><span class="nome">${m.nome}</span>${m.texto}</div>`;
+        }).join("")}
+      </div>
+      <div class="opcoes">
+        ${ep.opcoes.map(o => `<button class="opcao" data-opcao>${o}</button>`).join("")}
+      </div>
+      <form class="entrada ${uni ? "universos-entrada" : ""}" onsubmit="event.preventDefault()">
+        <input placeholder="Responda em inglês…">
+        <button>Enviar</button>
+      </form>
+    </div>
+
+    <aside class="lateral">
+      <h4>Legendas</h4>
+      <div class="dica"><strong>💡 Dica do tutor</strong>${ep.dica}</div>
+      <h4>Vocabulário da cena</h4>
+      <div class="vocab">${ep.vocab.map(([en, pt]) => `<span>${en} <small>${pt}</small></span>`).join("")}</div>
+      <div class="nota">Ao final do episódio, essas palavras viram cartas na aba Cartas.</div>
+    </aside>
+  </div>`;
+}
+
+render();
+</script>
+</body>
+</html>
