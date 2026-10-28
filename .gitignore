@@ -9,3 +9,10 @@ Thumbs.db
 # Credenciais locais (nunca versionar)
 .env
 js/config.local.js
+
+# Variáveis locais
+.env.local
+
+# Build e dependências
+node_modules/
+dist/

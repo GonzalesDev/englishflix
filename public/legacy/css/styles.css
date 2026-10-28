@@ -225,3 +225,11 @@
             #lyrics-container { max-height: 350px; padding: 20px; font-size: 16px; }
             .lyric-blank { width: 80px; padding: 2px 4px; font-size: 14px; }
         }
+
+/* === MODO EMBUTIDO (aberto dentro do app React em iframe) === */
+body.embed { height: 100vh; }
+body.embed .main-sidebar { display: none; }
+body.embed .app-content { padding-bottom: 0; }
+@media (max-width: 768px) {
+    body.embed .app-content { padding-bottom: 0; }
+}
